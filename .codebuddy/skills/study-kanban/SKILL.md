@@ -215,6 +215,7 @@ Board object:
 ```
 
 The **left-side menu** is generated from these boards automatically by `js/app.js`:
+<<<<<<< HEAD
 - One **top-level menu** per board (label = `board.title`, e.g. "SQL Server"), prefixed with an icon
   (`board.icon` or the 📘 fallback). Each top-level menu has a clickable header.
 - Under each top-level menu, its 5 **stage groups** (入门 / 基础 / 进阶 / 实战 / 精通) are rendered, each
@@ -226,6 +227,16 @@ The **left-side menu** is generated from these boards automatically by `js/app.j
   at most one group is expanded at a time. (All handled by the template — you only need to supply `boards`.)
 - A knowledge-point link mirrors its card's done state: when the card is completed, the menu link shows a
   green check + strikethrough and stays in sync on board switch / 全选 / 重置.
+=======
+- One **top-level menu** per board (label = `board.title`, e.g. "SQL Server"). Each top-level menu has a
+  header that is clickable.
+- Under each top-level menu, its 5 **stage groups** (入门 / 基础 / 进阶 / 实战 / 精通) are rendered
+  **always-expanded** — there is no collapse/expand interaction on stages. Each stage group directly lists
+  its knowledge-point links; clicking a knowledge-point link opens `item.link` in a new tab.
+- Clicking a top-level menu **header** (not the stage groups) switches the right side to that board's kanban
+  and syncs the menu to that board's knowledge points. (Handled by the template — you only need to supply
+  `boards`. Do not invent extra menu toggle/interaction; the template renders the menu exactly as described.)
+>>>>>>> a210b23 (skill优化)
 
 ### Step 4 — Generate the standalone board
 1. Copy `template/` to the output directory. Default output dir (relative to the skill, kept outside the

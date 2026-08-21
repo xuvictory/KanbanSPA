@@ -468,7 +468,7 @@ body {
 .card.done .card-title { text-decoration: line-through; color: var(--text-muted); }
 
 .card-top { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
-.card-checkbox {
+.card-check {
   width: 18px;
   height: 18px;
   border-radius: 5px;
@@ -481,9 +481,9 @@ body {
   cursor: pointer;
   transition: all 0.18s;
 }
-.card-checkbox:hover { border-color: #10b981; }
-.card.done .card-checkbox { background: #10b981; border-color: #10b981; }
-.card.done .card-checkbox::after {
+.card-check:hover { border-color: #10b981; }
+.card.done .card-check { background: #10b981; border-color: #10b981; }
+.card.done .card-check::after {
   content: '';
   width: 5px;
   height: 9px;

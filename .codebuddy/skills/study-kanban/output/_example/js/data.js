@@ -1,22 +1,28 @@
-// study-kanban 示例数据（简单模拟数据）
-// ===== 数据结构速览（生成真实看板时按此结构填写） =====
+// study-kanban 示例数据（多主题 demo，从 template 自动注入）
+// 本文件是 output/_example 与 template 唯一不同的文件：template 的 data.js 仅含占位符
+// `const boards = __BOARDS_DATA__;`，此处替换为真实 boards 数组。
 // boards：数组，每个元素是一个「学习主题」看板（= 左侧一个一级菜单）。
 //   单主题：1 个元素（页面自动退化为单看板，无切换菜单）；
-//   多主题：N 个元素（如 "sqlserver 和 oracle" → 2 个元素，左侧 2 个菜单）。
+//   多主题：N 个元素（如本例 2 个主题 → 左侧 2 个菜单）。
 // board = { id, title, subtitle, stages }
-//   id       — kebab-case 唯一标识（如 "demo-a"），用于 DOM id 与进度存储 key
+//   id       — kebab-case 唯一标识，用于 DOM id 与进度存储 key
 //   title    — 左侧一级菜单标题
 //   subtitle — 看板副标题
 //   stages   — 固定 5 阶段：入门/基础/进阶/实战/精通（id 1..5，不可增删改）
 // stage = { id, title, subtitle, color, items }
 //   id/title/subtitle/color 必须与固定框架一致（见 SKILL.md）
 // item = { title, type, desc, explain, criteria, link }
-//   title    — 知识点标题
 //   type     — "reading" | "hands-on" | "practice" | "mastery"
-//   desc     — 一句话描述（学习者将理解或做到什么）
-//   explain  — 大白话讲解（面向零基础，可带生活化比喻，必填）
-//   criteria — 可观察、可验收的标准
+//   explain  — 大白话讲解（必填，面向零基础）
 //   link     — 参考文档链接（可留空 ""）
+
+// type 标签 → 中文名（与 WorkBuddy 完全一致）
+const TYPE_LABELS = {
+  'reading':  '阅读理解',
+  'hands-on': '动手实操',
+  'practice': '练习巩固',
+  'mastery':  '综合应用'
+};
 
 const boards = [
   {
@@ -124,11 +130,3 @@ const boards = [
     ]
   }
 ];
-
-// type 标签 → 中文名（与 WorkBuddy 完全一致）
-const TYPE_LABELS = {
-  'reading':  '阅读理解',
-  'hands-on': '动手实操',
-  'practice': '练习巩固',
-  'mastery':  '综合应用'
-};

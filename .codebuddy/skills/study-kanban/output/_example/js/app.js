@@ -3,10 +3,6 @@
 // boards 结构见 SKILL.md：每个 board 是一个学习主题，对应一个左侧一级菜单 + 一个右侧看板。
 // 单主题时 boards 长度为 1（退化为单看板，无切换菜单）；多主题时长度为 N（左侧 N 个一级菜单）。
 
-// 注意：TYPE_LABELS 来自 data.js（示例数据自包含）。在 SKILL 实际产物中，template/js/data.js
-// 不含 TYPE_LABELS，由 template/js/app.js 顶部声明——此处的 app.js 因为 data.js 已经提供了，
-// 所以顶部不再重复声明 const TYPE_LABELS，避免 SyntaxError: redeclaration。
-
 // ===== 由 boards 动态构建看板配置（配置驱动，复用 WorkBuddy 的 switchBoard 模式） =====
 const BOARDS = {};
 boards.forEach((board, i) => {
