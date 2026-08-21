@@ -13,18 +13,13 @@
       <div class="sidebar-header">
         <div class="sidebar-logo">📚</div>
         <div>
-          <div class="sidebar-title">study-kanban</div>
-          <div class="sidebar-subtitle">学习看板</div>
+          <div class="sidebar-title">爱学习</div>
         </div>
       </div>
 
-      <div class="menu-group">
-        <div class="menu-group-title">看板信息</div>
-        <div class="info-card">
-          <div class="info-card-title" id="sidebar-board-title">__BOARD_TITLE__</div>
-          <div class="info-card-meta" id="sidebar-board-meta">加载中…</div>
-        </div>
-      </div>
+      <!-- 动态主题菜单区（由 app.js 根据 boards 渲染）：多个学习主题 → 多个一级菜单，
+           每个一级菜单下挂该主题的知识点子菜单（按阶段分组）。单主题时只渲染一个菜单。 -->
+      <div id="menuGroupsContainer"></div>
 
       <div class="menu-group">
         <div class="menu-group-title">操作</div>
@@ -43,14 +38,14 @@
           <p>__BOARD_SUBTITLE__</p>
         </div>
 
-        <div class="header-right">
+        <div class="progress-section header-right">
           <div class="progress-circle" id="progress-circle">
-            <div class="progress-inner">
-              <span class="progress-text" id="progress-text">0%</span>
-              <span class="progress-detail" id="progress-detail">0 / 0</span>
-            </div>
+            <span class="progress-text" id="progress-text">0%</span>
           </div>
-          <div class="progress-label">整体进度</div>
+          <div class="progress-info">
+            <span class="label">总进度</span>
+            <span class="value" id="progress-detail">0 / 0 知识点</span>
+          </div>
         </div>
       </header>
 
@@ -64,12 +59,12 @@
       <div class="toolbar">
         <div class="stage-buttons" id="stage-buttons"></div>
         <div class="toolbar-actions">
-          <button class="action-btn" id="select-all">✓ 一键全部完成</button>
+          <button class="action-btn select-all" id="select-all">✓ 一键全部完成</button>
           <button class="action-btn reset" id="reset-all">↺ 重置进度</button>
         </div>
       </div>
 
-      <div class="board" id="board"></div>
+      <div class="boards-container" id="boardsContainer"></div>
     </main>
   </div>
 
