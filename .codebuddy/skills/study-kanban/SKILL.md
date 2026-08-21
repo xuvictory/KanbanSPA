@@ -152,12 +152,33 @@ Inspect the user's input:
 - Otherwise treat it as **text input** (a topic/goal description OR pasted learning material) → go to Step 2b.
 
 **Multi-topic detection (text input only).** If the text describes MORE THAN ONE learning subject, split
-them into separate topics. Detect split points by scanning for separators such as "和" "与" "以及" "、" "、"
-"&" "/" (when used as a separator), and by recognizing that each side is itself a complete, independent
-subject (e.g. a named technology, language, or tool — "sqlserver", "oracle", "Python", "Java"). Each
-recognized subject becomes ONE top-level board.
-  - Example: "我想学习 sqlserver 和 oracle" → 2 topics → 2 boards (`sqlserver`, `oracle`).
-  - Example: "我想学 Python 爬虫做数据分析" → 1 topic (the phrase is one coherent goal) → 1 board.
+them into separate topics. Split the text by scanning for ANY of the following separators (Chinese words,
+Chinese punctuation, and ASCII symbols are all valid — the user may write "a和b"、"a+b"、"a/b"、"a,b"、
+"a、b"、"a，b"、"a|b"、"a&b"、"a and b" or even just "a b", and all must be recognized):
+
+- Chinese connectives: 和、与、以及、及、跟、同 (e.g. "sqlserver 和 oracle"、"Python 与 SQL").
+- Chinese punctuation: 顿号 "、"、中文逗号 "，" (e.g. "Python、Java"、"Python，Java").
+- ASCII symbols: 半角逗号 ","、加号 "+"、斜杠 "/"、竖线 "|"、连接符 "&" (e.g. "a+b"、"a/b"、"a,b").
+- English word: "and" (e.g. "Python and SQL").
+- Whitespace juxtaposition: two clearly independent subjects separated only by spaces (e.g. "sqlserver
+  oracle"); split only when each side is a complete, standalone subject.
+
+After splitting, TRIM each fragment; a fragment becomes ONE board only if it is a complete, independent
+subject (e.g. a named technology, language, or tool — "sqlserver", "oracle", "Python", "Java").
+
+Special cases — do NOT split on a separator that is part of a term:
+- "+" inside "C++" is part of the language name, not a separator: "C++" → 1 board, "C++ 和 Python" → 2 boards.
+- "/" inside a versioned/proper name such as "HTTP/2" or "Vue3/TS" is NOT a separator unless each side is
+  itself independently learnable.
+- A hyphen "-" is a separator only when both sides are complete, independent subjects (e.g. "sqlserver-oracle"
+  → 2 boards); do not split hyphenated single terms like "machine-learning".
+
+Examples:
+  - "我想学习 sqlserver 和 oracle" → 2 topics → 2 boards (`sqlserver`, `oracle`).
+  - "我想同时学 Python+SQL" → 2 topics → 2 boards (`python`, `sql`).
+  - "帮我做 Vue/React 学习看板" → 2 topics → 2 boards (`vue`, `react`).
+  - "深度学习,机器学习" → 2 topics → 2 boards (`deep-learning`, `machine-learning`).
+  - "我想学 Python 爬虫做数据分析" → 1 topic (the phrase is one coherent goal) → 1 board.
   - When ambiguous (one subject with sub-parts vs. multiple subjects), treat them as multiple subjects only
     if each can stand alone as a full learning path; otherwise keep one board. Do NOT ask unless truly
     ambiguous — prefer producing the multiple boards.
