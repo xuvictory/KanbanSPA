@@ -26,6 +26,7 @@ boards.forEach((board, i) => {
     headerId: `header-${id}`,
     title: board.title || (board.stages && board.stages[0] && board.stages[0].title) || '学习看板',
     subtitle: board.subtitle || '',
+    icon: board.icon || '📘',                  // 左侧一级菜单图标，缺省用通用书本 emoji 兜底
     resetName: board.title || '看板'
   };
 });
@@ -389,7 +390,10 @@ function renderMenuGroups() {
 
     return `<div class="menu-group" id="${cfg.groupId}">
       <div class="menu-group-header" id="${cfg.headerId}" data-board="${id}">
-        <span class="menu-group-title">${escapeHtml(cfg.title)}</span>
+        <span class="menu-group-label">
+          <span class="menu-group-icon">${escapeHtml(cfg.icon)}</span>
+          <span class="menu-group-title">${escapeHtml(cfg.title)}</span>
+        </span>
         <span class="arrow">▾</span>
       </div>
       <div class="menu-group-items">${stageLinks}</div>

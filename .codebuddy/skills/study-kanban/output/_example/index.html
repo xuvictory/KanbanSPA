@@ -17,7 +17,8 @@
         </div>
       </div>
 
-      <!-- 动态主题菜单区：演示「多主题」时左侧出现 示例主题 A / 示例主题 B 两个一级菜单 -->
+      <!-- 动态主题菜单区（由 app.js 根据 boards 渲染）：多个学习主题 → 多个一级菜单，
+           每个一级菜单下挂该主题的知识点子菜单（按阶段分组）。单主题时只渲染一个菜单。 -->
       <div id="menuGroupsContainer"></div>
 
       <div class="menu-group">
@@ -49,10 +50,10 @@
       </header>
 
       <div class="legend">
-        <span class="legend-item"><span class="legend-dot tag-reading"></span>阅读理解</span>
-        <span class="legend-item"><span class="legend-dot tag-hands-on"></span>动手实操</span>
-        <span class="legend-item"><span class="legend-dot tag-practice"></span>练习巩固</span>
-        <span class="legend-item"><span class="legend-dot tag-mastery"></span>综合应用</span>
+        <span class="legend-item"><span class="legend-dot reading"></span>阅读理解</span>
+        <span class="legend-item"><span class="legend-dot hands-on"></span>动手实操</span>
+        <span class="legend-item"><span class="legend-dot practice"></span>练习巩固</span>
+        <span class="legend-item"><span class="legend-dot mastery"></span>综合应用</span>
       </div>
 
       <div class="toolbar">

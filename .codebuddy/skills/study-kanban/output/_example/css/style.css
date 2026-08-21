@@ -1,5 +1,21 @@
 /* study-kanban — 视觉风格 1:1 复制自 WorkBuddy 学习看板（单看板裁剪版） */
 
+/* 本地存储不可用时给出的轻量提示 */
+.persist-warning {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
 :root {
   --bg: #f5f7fa;
   --primary: #3b82f6;
@@ -10,11 +26,6 @@
   --text-muted: #64748b;
   --card-bg: #ffffff;
   --border: #e2e8f0;
-
-  --tag-reading: #3b82f6;
-  --tag-hands-on: #14b8a6;
-  --tag-practice: #8b5cf6;
-  --tag-mastery: #f59e0b;
 
   --col-color: #3b82f6;
 }
@@ -64,8 +75,20 @@ body {
   text-transform: uppercase;
   letter-spacing: 1px;
   opacity: 0.55;
-  margin-bottom: 8px;
   padding-left: 6px;
+}
+.menu-group-label {
+  display: flex;
+  align-items: center;   /* 图标与文字垂直居中对齐 */
+  margin-right: auto;    /* 把折叠箭头推到最右端 */
+}
+.menu-group-icon {
+  font-size: 14px;
+  line-height: 1;
+  margin-right: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 
@@ -161,7 +184,7 @@ body {
   position: relative;
   transition: all 0.18s;
 }
-.menu-link.done { color: #86efac; }
+.menu-link.done { color: #86efac; text-decoration: line-through; }
 .menu-link.done .menu-link-check {
   background: #10b981;
   border-color: #10b981;
@@ -177,7 +200,6 @@ body {
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
-.menu-link.done .menu-link-text { text-decoration: line-through; }
 
 .collapse-btn {
   position: absolute;
@@ -255,7 +277,7 @@ body {
 .progress-info .label { font-size: 12px; opacity: 0.8; }
 .progress-info .value { font-size: 16px; font-weight: 700; }
 
-/* ============ 图例 ============ */
+/* ============ 图例（浅底深字，与卡片 tag 视觉一致，1:1 复制 WorkBuddy） ============ */
 .legend {
   display: flex;
   gap: 18px;
@@ -264,11 +286,17 @@ body {
   border-bottom: 1px solid var(--border);
 }
 .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
-.legend-dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
-.tag-reading { background: var(--tag-reading); }
-.tag-hands-on { background: var(--tag-hands-on); }
-.tag-practice { background: var(--tag-practice); }
-.tag-mastery { background: var(--tag-mastery); }
+.legend-dot {
+  display: inline-block;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+.legend-dot.reading  { background: #dbeafe; color: #2563eb; }
+.legend-dot.hands-on { background: #ccfbf1; color: #0d9488; }
+.legend-dot.practice { background: #ede9fe; color: #7c3aed; }
+.legend-dot.mastery  { background: #fef3c7; color: #b45309; }
 
 /* ============ 工具栏 ============ */
 .toolbar {
@@ -353,23 +381,21 @@ body {
 }
 .action-btn.reset:hover { border-color: #f43f5e; color: #f43f5e; }
 
-/* ============ 看板容器 & 看板 ============ */
-.boards-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
+/* ============ 看板 ============ */
 .board {
   flex: 1;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 16px;
   padding: 20px 28px;
   align-items: flex-start;
   overflow-x: auto;
+  min-height: 600px;
 }
-.board.hidden { display: none !important; }
+.board::-webkit-scrollbar { height: 8px; }
+.board::-webkit-scrollbar-track { background: var(--bg); border-radius: 4px; }
+.board::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+.board::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
 .column {
   flex: 0 0 220px;
@@ -399,7 +425,6 @@ body {
   padding: 12px 14px 8px;
   border-bottom: 1px solid var(--border);
 }
-.column-title-row { display: flex; align-items: center; gap: 8px; }
 .stage-badge {
   width: 22px;
   height: 22px;
@@ -443,7 +468,7 @@ body {
 .card.done .card-title { text-decoration: line-through; color: var(--text-muted); }
 
 .card-top { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
-.card-check {
+.card-checkbox {
   width: 18px;
   height: 18px;
   border-radius: 5px;
@@ -456,9 +481,9 @@ body {
   cursor: pointer;
   transition: all 0.18s;
 }
-.card-check:hover { border-color: #10b981; }
-.card.done .card-check { background: #10b981; border-color: #10b981; }
-.card.done .card-check::after {
+.card-checkbox:hover { border-color: #10b981; }
+.card.done .card-checkbox { background: #10b981; border-color: #10b981; }
+.card.done .card-checkbox::after {
   content: '';
   width: 5px;
   height: 9px;

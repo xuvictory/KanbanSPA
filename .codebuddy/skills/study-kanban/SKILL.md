@@ -42,6 +42,11 @@ go from zero to mastery along one coherent path.
 
 ## Design principles to preserve (must match WorkBuddy 1:1)
 
+**Visual baseline (IMPORTANT):** the `WorkBuddy/` source files (`WorkBuddy/workbuddy-learning-board.html`
+and its `css/` + `js/`) are the **single 1:1 visual reference** for this skill. Any change to
+`template/` (HTML/CSS/JS) MUST be checked against the WorkBuddy source so the generated board stays
+visually identical — do not diverge the design tokens, tag rendering, or layout from WorkBuddy.
+
 Keep these exact visual tokens so the generated board is indistinguishable in style:
 
 - Background `#f5f7fa`; primary blue `#3b82f6`; gradients: header `135deg #1e3a5f→#2563eb→#3b82f6`,
@@ -49,6 +54,8 @@ Keep these exact visual tokens so the generated board is indistinguishable in st
 - Column: width `220px`, top `3px` stage-color border (`--col-color`).
 - Card: `min-height: 210px`, fields = checkbox+title, type tag, description, **通俗讲解 (new)**,
   验收标准 (left-border block), "查看文档 →" link.
+- **Card interaction**: clicking **anywhere on the card** (not just the checkbox) toggles its done state,
+  saves progress, and syncs the matching left-menu link. The checkbox is a visual indicator only.
 - Four type tags (keep their colors even if a subset is used). **Rendering style matches WorkBuddy
   exactly: light background + dark text (NOT solid fill)** — so a tag reads as e.g.
   `reading` = bg `#dbeafe` / text `#2563eb`, `hands-on` = bg `#ccfbf1` / text `#0d9488`,
@@ -192,6 +199,7 @@ Board object:
 {
   id: "sqlserver",                 // kebab-case slug, used for DOM id + localStorage key prefix
   title: "SQL Server 学习路线",     // shown as the top-level left menu label
+  icon: "🗄️",                      // 可选：左侧一级菜单前的小图标（emoji 或单字符），缺省回退 📘
   subtitle: "从入门到精通 · 5 阶段、N 个知识点",
   stages: [
     {
@@ -207,14 +215,17 @@ Board object:
 ```
 
 The **left-side menu** is generated from these boards automatically by `js/app.js`:
-- One **top-level menu** per board (label = `board.title`, e.g. "SQL Server"). Each top-level menu has a
-  header that is clickable.
-- Under each top-level menu, its 5 **stage groups** (入门 / 基础 / 进阶 / 实战 / 精通) are rendered
-  **always-expanded** — there is no collapse/expand interaction on stages. Each stage group directly lists
-  its knowledge-point links; clicking a knowledge-point link opens `item.link` in a new tab.
-- Clicking a top-level menu **header** (not the stage groups) switches the right side to that board's kanban
-  and syncs the menu to that board's knowledge points. (Handled by the template — you only need to supply
-  `boards`. Do not invent extra menu toggle/interaction; the template renders the menu exactly as described.)
+- One **top-level menu** per board (label = `board.title`, e.g. "SQL Server"), prefixed with an icon
+  (`board.icon` or the 📘 fallback). Each top-level menu has a clickable header.
+- Under each top-level menu, its 5 **stage groups** (入门 / 基础 / 进阶 / 实战 / 精通) are rendered, each
+  listing its knowledge-point links; clicking a link with `item.link` opens it in a new tab, and a link with
+  no `item.link` renders as a non-clickable static item (no `href="#"` jump).
+- **Collapse / expand**: clicking a top-level menu **header** switches the right side to that board's kanban
+  and expands that menu group; clicking the **▾ arrow** (inside the header) folds/expands only that group
+  without switching boards. By default only the first board's group is expanded and the rest are collapsed —
+  at most one group is expanded at a time. (All handled by the template — you only need to supply `boards`.)
+- A knowledge-point link mirrors its card's done state: when the card is completed, the menu link shows a
+  green check + strikethrough and stays in sync on board switch / 全选 / 重置.
 
 ### Step 4 — Generate the standalone board
 1. Copy `template/` to the output directory. Default output dir (relative to the skill, kept outside the
@@ -270,3 +281,23 @@ items count, source type — link or text). Mention it can be opened directly or
   fold two distinct subjects into one board's five stages.
 - Preserve the card field structure exactly (now with `explain`); only the *content* and *granularity*
   are adaptive.
+
+## Maintenance convention (template ↔ example must stay in sync)
+
+`template/` is the **golden reference**. `output/_example/` is a filled, runnable demo generated from it
+(its `js/data.js` holds sample multi-topic data and is the ONLY file that should differ from the template).
+Whenever `template/index.html`, `template/js/app.js`, or `template/css/style.css` is changed, re-sync the
+corresponding files in `output/_example/` by copying them over (keep `output/_example/js/data.js` intact).
+This prevents the example from silently drifting out of date and no longer representing real output.
+
+### Critical: `TYPE_LABELS` source-of-truth differs by file
+
+- `template/js/app.js` declares `const TYPE_LABELS = {...}` **at the top** (it is the single source in the
+  real generated product, because `template/js/data.js` only contains `boards`).
+- `output/_example/js/data.js` declares `TYPE_LABELS` too (the demo is self-contained, so AI / readers
+  can copy the data file alone).
+- Therefore when re-syncing `output/_example/js/app.js` from `template/js/app.js`, you MUST **delete** the
+  top-level `const TYPE_LABELS = {...}` block in the copied file — otherwise the browser throws
+  `SyntaxError: Identifier 'TYPE_LABELS' has already been declared` and the whole `app.js` fails to
+  parse, leaving the left-side menu empty (only static HTML in `index.html` is rendered). Conversely,
+  when editing `template/js/app.js`, keep its top-level `TYPE_LABELS` — it is the only declaration there.

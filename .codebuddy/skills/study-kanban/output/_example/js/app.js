@@ -1,7 +1,11 @@
 // ===== study-kanban 逻辑层 =====
-// 依赖：data.js 先加载，提供全局 boards / TYPE_LABELS
+// 依赖：data.js 先加载，提供全局 boards 与 TYPE_LABELS
 // boards 结构见 SKILL.md：每个 board 是一个学习主题，对应一个左侧一级菜单 + 一个右侧看板。
 // 单主题时 boards 长度为 1（退化为单看板，无切换菜单）；多主题时长度为 N（左侧 N 个一级菜单）。
+
+// 注意：TYPE_LABELS 来自 data.js（示例数据自包含）。在 SKILL 实际产物中，template/js/data.js
+// 不含 TYPE_LABELS，由 template/js/app.js 顶部声明——此处的 app.js 因为 data.js 已经提供了，
+// 所以顶部不再重复声明 const TYPE_LABELS，避免 SyntaxError: redeclaration。
 
 // ===== 由 boards 动态构建看板配置（配置驱动，复用 WorkBuddy 的 switchBoard 模式） =====
 const BOARDS = {};
@@ -18,6 +22,7 @@ boards.forEach((board, i) => {
     headerId: `header-${id}`,
     title: board.title || (board.stages && board.stages[0] && board.stages[0].title) || '学习看板',
     subtitle: board.subtitle || '',
+    icon: board.icon || '📘',                  // 左侧一级菜单图标，缺省用通用书本 emoji 兜底
     resetName: board.title || '看板'
   };
 });
@@ -31,18 +36,81 @@ let currentBoard = BOARD_IDS[0];
 // 点击顶部阶段按钮后，在平滑滚动动画期间忽略 scroll 同步，避免滚动停止后重新计算覆盖用户点击
 let suppressScrollSyncUntil = 0;
 
-// ===== 进度读写 =====
-function loadProgress(id) {
+// ===== 进度读写（localStorage 为主，OPFS 为 file:// 下的强兜底，保证关浏览器再开仍自动加载） =====
+// 检测 localStorage 是否可用（部分浏览器在 file:// / 隐私模式下会禁用）
+const STORAGE_AVAILABLE = (() => {
   try {
-    const saved = localStorage.getItem(BOARDS[id].storageKey);
-    if (saved) progressStore[id] = JSON.parse(saved);
-  } catch (e) { progressStore[id] = {}; }
+    const k = '__kb_test__';
+    localStorage.setItem(k, '1');
+    localStorage.removeItem(k);
+    return true;
+  } catch (e) { return false; }
+})();
+
+function lsGet(key) {
+  if (!STORAGE_AVAILABLE) return null;
+  try { return localStorage.getItem(key); } catch (e) { return null; }
+}
+function lsSet(key, val) {
+  if (!STORAGE_AVAILABLE) return;
+  try { localStorage.setItem(key, val); } catch (e) {}
+}
+
+// OPFS（Origin Private File System）：Chromium 在 file:// 下可用且跨会话持久化，
+// 即使 localStorage 被禁用也能恢复进度；不支持的浏览器静默回退到 localStorage。
+let opfsDir = null;
+async function opfsInit() {
+  try {
+    if (navigator.storage && navigator.storage.getDirectory) {
+      opfsDir = await navigator.storage.getDirectory();
+    }
+  } catch (e) { opfsDir = null; }
+}
+async function opfsRead(key) {
+  if (!opfsDir) return null;
+  try {
+    const handle = await opfsDir.getFileHandle(key, { create: false });
+    const file = await handle.getFile();
+    return await file.text();
+  } catch (e) { return null; }
+}
+async function opfsWrite(key, val) {
+  if (!opfsDir) return;
+  try {
+    const handle = await opfsDir.getFileHandle(key, { create: true });
+    const w = await handle.createWritable();
+    await w.write(val);
+    await w.close();
+  } catch (e) {}
+}
+
+function loadProgress(id) {
+  // 主路径：localStorage（同步，保证首次渲染即可见）
+  const raw = lsGet(BOARDS[id].storageKey);
+  if (raw) {
+    try { progressStore[id] = JSON.parse(raw); } catch (e) { progressStore[id] = {}; }
+  }
+  // 兜底路径：OPFS 异步读取。若 localStorage 为空则以 OPFS 为准并补渲染；
+  // 若两者都有数据，则合并（OPFS 通常更新，覆盖同名 key）。
+  opfsRead(BOARDS[id].storageKey).then(raw2 => {
+    if (!raw2) return;
+    try {
+      const data = JSON.parse(raw2);
+      const wasEmpty = !raw;
+      progressStore[id] = { ...progressStore[id], ...data };
+      if (wasEmpty) {
+        renderBoard(id);
+        if (!singleBoard) refreshMenuLinkStates(id);
+        updateProgress(id);
+      }
+    } catch (e) {}
+  });
 }
 
 function saveProgress(id) {
-  try {
-    localStorage.setItem(BOARDS[id].storageKey, JSON.stringify(progressStore[id]));
-  } catch (e) {}
+  const val = JSON.stringify(progressStore[id]);
+  lsSet(BOARDS[id].storageKey, val);
+  opfsWrite(BOARDS[id].storageKey, val); // 异步兜底，失败不影响主路径
 }
 
 function isDone(id, stageId, itemIdx) {
@@ -180,12 +248,15 @@ function safeLink(url) {
 
 function renderBoard(id) {
   const cfg = BOARDS[id];
+  const container = document.getElementById('boardsContainer');
+  // 模板 HTML 仅含空的 boardsContainer；首次渲染时自动创建并挂载对应 id 的 .board 容器，
+  // 保证后续 getElementById(cfg.boardId) / switchBoard 的 .hidden 互斥逻辑均可用。
   let board = document.getElementById(cfg.boardId);
-  if (!board) {
+  if (!board && container) {
     board = document.createElement('div');
-    board.className = 'board';
+    board.className = 'board hidden';
     board.id = cfg.boardId;
-    document.getElementById('boardsContainer').appendChild(board);
+    container.appendChild(board);
   }
   let html = '';
   cfg.stages.forEach(stage => {
@@ -206,8 +277,12 @@ function renderBoard(id) {
 
     stage.items.forEach((item, idx) => {
       const done = isDone(id, stage.id, idx);
-      const tagClass = `tag-${item.type}`;
-      const typeLabel = TYPE_LABELS[item.type] || item.type;
+      const itemType = TYPE_LABELS[item.type] ? item.type : 'reading';
+      const tagClass = `tag-${itemType}`;
+      const typeLabel = TYPE_LABELS[item.type] || TYPE_LABELS.reading;
+      const linkHtml = item.link
+        ? `<a class="card-link" href="${safeLink(item.link)}" target="_blank" rel="noopener">查看文档 →</a>`
+        : '';
       html += `<div class="card ${done ? 'done' : ''}" data-board="${id}" data-stage-id="${stage.id}" data-item-idx="${idx}">
         <div class="card-top">
           <div class="card-checkbox"></div>
@@ -215,11 +290,11 @@ function renderBoard(id) {
         </div>
         <span class="card-tag ${tagClass}">${escapeHtml(typeLabel)}</span>
         <div class="card-desc">${escapeHtml(item.desc)}</div>
-        <div class="card-explain"><strong>通俗讲解</strong><br>${escapeHtml(item.explain)}</div>
+        <div class="card-explain"><span class="card-explain-label">通俗讲解</span>${escapeHtml(item.explain)}</div>
         <div class="card-criteria">
           <strong>验收标准</strong><br>${escapeHtml(item.criteria)}
         </div>
-        <a class="card-link" href="${safeLink(item.link)}" target="_blank" rel="noopener">查看文档 →</a>
+        ${linkHtml}
       </div>`;
     });
 
@@ -293,6 +368,12 @@ function renderMenuGroups() {
     const stageLinks = cfg.stages.map(stage => {
       const links = stage.items.map((item, idx) => {
         const done = isDone(id, stage.id, idx);
+        // 无外部文档时渲染为不可跳转的 span，避免点击 href="#" 跳到页顶
+        if (!item.link) {
+          return `<span class="menu-link ${done ? 'done' : ''}" data-board="${id}" data-stage-id="${stage.id}" data-item-idx="${idx}">
+            <span class="menu-link-check"></span>${escapeHtml(item.title)}
+          </span>`;
+        }
         return `<a class="menu-link ${done ? 'done' : ''}" data-board="${id}" data-stage-id="${stage.id}" data-item-idx="${idx}" href="${safeLink(item.link)}" target="_blank" rel="noopener">
           <span class="menu-link-check"></span>${escapeHtml(item.title)}
         </a>`;
@@ -305,7 +386,10 @@ function renderMenuGroups() {
 
     return `<div class="menu-group" id="${cfg.groupId}">
       <div class="menu-group-header" id="${cfg.headerId}" data-board="${id}">
-        <span class="menu-group-title">${escapeHtml(cfg.title)}</span>
+        <span class="menu-group-label">
+          <span class="menu-group-icon">${escapeHtml(cfg.icon)}</span>
+          <span class="menu-group-title">${escapeHtml(cfg.title)}</span>
+        </span>
         <span class="arrow">▾</span>
       </div>
       <div class="menu-group-items">${stageLinks}</div>
@@ -446,13 +530,23 @@ function bindEvents() {
 }
 
 // ===== Init =====
-BOARD_IDS.forEach(id => {
-  loadProgress(id);
-  renderBoard(id);
-});
-renderMenuGroups();
-initMenuGroupState();
-// 设置初始可见看板（多主题时隐藏其余 board；单主题时直接显示）
-switchBoard(currentBoard);
-bindBoardScrollSync();
-bindEvents();
+(async function init() {
+  await opfsInit();                 // 先初始化 OPFS，使兜底存储可用
+  BOARD_IDS.forEach(id => {
+    loadProgress(id);               // 同步读 localStorage，并异步触发 OPFS 合并
+    renderBoard(id);
+  });
+  renderMenuGroups();
+  initMenuGroupState();
+  // 设置初始可见看板（多主题时隐藏其余 board；单主题时直接显示）
+  switchBoard(currentBoard);
+  bindBoardScrollSync();
+  bindEvents();
+  // 若两种持久化均不可用，给出轻量提示（仅当前会话内有效）
+  if (!STORAGE_AVAILABLE && !opfsDir) {
+    const tip = document.createElement('div');
+    tip.className = 'persist-warning';
+    tip.textContent = '当前浏览器禁用了本地存储，学习进度不会被保存。';
+    document.body.appendChild(tip);
+  }
+})();

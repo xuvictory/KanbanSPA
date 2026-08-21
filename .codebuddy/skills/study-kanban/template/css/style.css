@@ -75,8 +75,20 @@ body {
   text-transform: uppercase;
   letter-spacing: 1px;
   opacity: 0.55;
-  margin-bottom: 8px;
   padding-left: 6px;
+}
+.menu-group-label {
+  display: flex;
+  align-items: center;   /* 图标与文字垂直居中对齐 */
+  margin-right: auto;    /* 把折叠箭头推到最右端 */
+}
+.menu-group-icon {
+  font-size: 14px;
+  line-height: 1;
+  margin-right: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 
