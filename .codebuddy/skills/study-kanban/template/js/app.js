@@ -289,7 +289,7 @@ function renderBoard(id) {
         : '';
       html += `<div class="card ${done ? 'done' : ''}" data-board="${id}" data-stage-id="${stage.id}" data-item-idx="${idx}">
         <div class="card-top">
-          <div class="card-checkbox"></div>
+          <div class="card-check"></div>
           <div class="card-title">${escapeHtml(item.title)}</div>
         </div>
         <span class="card-tag ${tagClass}">${escapeHtml(typeLabel)}</span>

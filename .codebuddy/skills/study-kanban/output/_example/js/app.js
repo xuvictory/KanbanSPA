@@ -1,7 +1,10 @@
 // ===== study-kanban 逻辑层 =====
-// 依赖：data.js 先加载，提供全局 boards 与 TYPE_LABELS
+// 依赖：data.js 先加载，提供全局 boards
 // boards 结构见 SKILL.md：每个 board 是一个学习主题，对应一个左侧一级菜单 + 一个右侧看板。
 // 单主题时 boards 长度为 1（退化为单看板，无切换菜单）；多主题时长度为 N（左侧 N 个一级菜单）。
+
+// type 标签 → 中文名（与 WorkBuddy 完全一致）。注意：在 output/_example 中此映射由
+// js/data.js 声明（demo 自包含，可单独拷贝 data 文件）；template 的 app.js 才是唯一声明处。
 
 // ===== 由 boards 动态构建看板配置（配置驱动，复用 WorkBuddy 的 switchBoard 模式） =====
 const BOARDS = {};
@@ -281,7 +284,7 @@ function renderBoard(id) {
         : '';
       html += `<div class="card ${done ? 'done' : ''}" data-board="${id}" data-stage-id="${stage.id}" data-item-idx="${idx}">
         <div class="card-top">
-          <div class="card-checkbox"></div>
+          <div class="card-check"></div>
           <div class="card-title">${escapeHtml(item.title)}</div>
         </div>
         <span class="card-tag ${tagClass}">${escapeHtml(typeLabel)}</span>

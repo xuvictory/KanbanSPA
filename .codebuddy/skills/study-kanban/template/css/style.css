@@ -392,6 +392,7 @@ body {
   overflow-x: auto;
   min-height: 600px;
 }
+.board.hidden { display: none; }
 .board::-webkit-scrollbar { height: 8px; }
 .board::-webkit-scrollbar-track { background: var(--bg); border-radius: 4px; }
 .board::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
