@@ -13,7 +13,7 @@ const BOARDS = {
     groupId: 'group-guide',
     headerId: 'header-guide',
     title: 'WorkBuddy 学习路线看板',
-    subtitle: '从零基础到熟练运用 — 7 个阶段、28 个知识点，逐步攻克',
+    subtitle: '从零基础到熟练运用 — 7 个阶段、35 个知识点，逐步攻克',
     resetName: '入门指南'
   },
   advanced: {
@@ -26,7 +26,7 @@ const BOARDS = {
     groupId: 'group-advanced',
     headerId: 'header-advanced',
     title: 'WorkBuddy 功能说明看板',
-    subtitle: '从入门到精通 — 7 个功能模块、29 个知识点，深度掌握',
+    subtitle: '从入门到精通 — 25 个阶段、112 个知识点，深度掌握',
     resetName: '进阶指南'
   }
 };
