@@ -280,8 +280,9 @@ function renderBoard(id) {
 
     stage.items.forEach((item, idx) => {
       const done = isDone(id, stage.id, idx);
-      const tagClass = `tag-${item.type}`;
-      const typeLabel = TYPE_LABELS[item.type] || item.type;
+      const itemType = TYPE_LABELS[item.type] ? item.type : 'reading';
+      const tagClass = `tag-${itemType}`;
+      const typeLabel = TYPE_LABELS[item.type] || TYPE_LABELS.reading;
       const linkHtml = item.link
         ? `<a class="card-link" href="${safeLink(item.link)}" target="_blank" rel="noopener">查看文档 →</a>`
         : '';

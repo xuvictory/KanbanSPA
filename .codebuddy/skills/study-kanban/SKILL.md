@@ -1,18 +1,11 @@
 ---
 name: study-kanban
 description: >-
-  This skill should be used when the user provides either (a) an official website / documentation page /
-  learning-material link,   or (b) a piece of text describing a topic (a goal like "我想学 Python 爬虫做数据分析") or pasted learning
-  material (notes / tutorial / outline), and wants it automatically converted into a self-contained,
-  visually consistent study kanban board. The board uses the same blue-gradient, card-based, progress-ring
-  design language as the WorkBuddy learning board, applies a fixed 5-stage framework (入门 → 基础 → 进阶 →
-  实战 → 精通), explains every knowledge point in plain language for absolute beginners, and aims to be
-  comprehensive with no gaps. When the description names MULTIPLE learning topics (e.g. "我想学习 sqlserver
-  和 oracle"), it produces a MULTI-BOARD layout: the left sidebar shows one top-level menu per topic;
-  clicking a topic switches the right side to that topic's board, and each topic's sub-menu keeps that
-  topic's collected knowledge-point links. Trigger phrases include "把这个文档转成看板", "根据链接生成学习看板",
-  "用一段文字生成看板", "帮我整理 XX 的学习路线", "做一个 study-kanban", or any request to turn a URL / a topic
-  description / pasted material into a staged kanban of knowledge points for beginners.
+  Convert a URL / documentation link, a topic or goal description, or pasted learning material into a
+  self-contained study kanban board with WorkBuddy's blue-gradient card design and a fixed 5-stage
+  framework (入门 → 基础 → 进阶 → 实战 → 精通), explained in plain language for beginners. Multi-topic input
+  yields a multi-board layout. Trigger phrases: "把这个文档转成看板", "根据链接生成学习看板", "用一段文字生成看板",
+  "帮我整理 XX 的学习路线", "做一个 study-kanban".
 ---
 
 # study-kanban
@@ -63,6 +56,8 @@ Keep these exact visual tokens so the generated board is indistinguishable in st
   Do NOT change tag rendering to solid-fill.
 - Progress ring: `conic-gradient` white over translucent; glassmorphism pill container.
 - Stage pills in toolbar; legend row; one-click 全选 / 重置 buttons; collapsible sidebar.
+  Note: 全选 / 重置 buttons operate on the **currently visible board only** (in a multi-board layout they
+  do NOT affect the other boards' checkboxes).
 - Legend: the four type labels render as the SAME light-bg/dark-text chips as the card tags (1:1 with
   WorkBuddy's `.legend-tag`), NOT solid color dots.
 
@@ -105,6 +100,8 @@ friendliness — do not omit it.
   explain: "用大白话解释：这是什么、为什么这样、怎么上手（面向零基础，最好带一个生活化比喻）",  // 新增，必填
   criteria: "可观察、可验收的标准（学习者做到什么算掌握）",
   link:  "https://... 该知识点对应的原文锚点，尽量用原链接"  // 可选；为空时卡片不显示「查看文档 →」，左侧菜单该知识点渲染为不可跳转的静态项
+  // 协议约束：`link` 必须是 http(s) 绝对链接（以 https:// 或 http:// 开头）。
+  // 相对路径、file://、或任何其他协议会被模板的 safeLink 过滤为 "#" 而不渲染链接，请勿使用。
 }
 ```
 
@@ -113,6 +110,8 @@ Type selection guide (adaptive — use the subset that fits the material):
 - `hands-on`  : 动手实操 — follow steps, do it once.
 - `practice`  : 练习巩固 — complete independently.
 - `mastery`   : 综合应用 — real scenario drill.
+- Template fallback: if an `item.type` is missing or not one of the four values, the template renders it
+  as `reading` (tag + label) so the card never breaks. Still, always supply a valid `type`.
 
 ## Comprehensiveness rules (no gaps)
 
@@ -208,11 +207,14 @@ Board object:
 ```
 
 The **left-side menu** is generated from these boards automatically by `js/app.js`:
-- One **top-level menu** per board (label = `board.title`, e.g. "SQL Server").
-- Each top-level menu expands to show its 5 stage sub-items; clicking a stage reveals that stage's
-  knowledge-point links (the sub-menu). Clicking a knowledge-point link opens `item.link` in a new tab.
-- Clicking a top-level menu switches the right side to that board's kanban and syncs the sub-menu to that
-  board's knowledge points. (This is handled by the template — you only need to supply `boards`.)
+- One **top-level menu** per board (label = `board.title`, e.g. "SQL Server"). Each top-level menu has a
+  header that is clickable.
+- Under each top-level menu, its 5 **stage groups** (入门 / 基础 / 进阶 / 实战 / 精通) are rendered
+  **always-expanded** — there is no collapse/expand interaction on stages. Each stage group directly lists
+  its knowledge-point links; clicking a knowledge-point link opens `item.link` in a new tab.
+- Clicking a top-level menu **header** (not the stage groups) switches the right side to that board's kanban
+  and syncs the menu to that board's knowledge points. (Handled by the template — you only need to supply
+  `boards`. Do not invent extra menu toggle/interaction; the template renders the menu exactly as described.)
 
 ### Step 4 — Generate the standalone board
 1. Copy `template/` to the output directory. Default output dir (relative to the skill, kept outside the
