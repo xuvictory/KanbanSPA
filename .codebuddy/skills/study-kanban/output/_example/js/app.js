@@ -491,11 +491,12 @@ function bindEvents() {
   const sidebarReset = document.getElementById('sidebar-reset');
   if (sidebarReset) sidebarReset.addEventListener('click', resetAll);
 
-  // 返回顶部
+  // 返回顶部：页面回到顶部，同时看板横向回到第一列
   const backToTop = document.getElementById('back-to-top');
   if (backToTop) backToTop.addEventListener('click', () => {
     const board = document.getElementById(BOARDS[currentBoard].boardId);
     if (board) board.scrollTo({ left: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
   // 看板列 / 卡片：事件委托（链接优先于卡片，卡片优先于列）
