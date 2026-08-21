@@ -1,7 +1,15 @@
 // ===== study-kanban 逻辑层 =====
-// 依赖：data.js 先加载，提供全局 boards / TYPE_LABELS
+// 依赖：data.js 先加载，提供全局 boards
 // boards 结构见 SKILL.md：每个 board 是一个学习主题，对应一个左侧一级菜单 + 一个右侧看板。
 // 单主题时 boards 长度为 1（退化为单看板，无切换菜单）；多主题时长度为 N（左侧 N 个一级菜单）。
+
+// type 标签 → 中文名（与 WorkBuddy 完全一致）
+const TYPE_LABELS = {
+  'reading':  '阅读理解',
+  'hands-on': '动手实操',
+  'practice': '练习巩固',
+  'mastery':  '综合应用'
+};
 
 // ===== 由 boards 动态构建看板配置（配置驱动，复用 WorkBuddy 的 switchBoard 模式） =====
 const BOARDS = {};
@@ -243,7 +251,16 @@ function safeLink(url) {
 
 function renderBoard(id) {
   const cfg = BOARDS[id];
-  const board = document.getElementById(cfg.boardId);
+  const container = document.getElementById('boardsContainer');
+  // 模板 HTML 仅含空的 boardsContainer；首次渲染时自动创建并挂载对应 id 的 .board 容器，
+  // 保证后续 getElementById(cfg.boardId) / switchBoard 的 .hidden 互斥逻辑均可用。
+  let board = document.getElementById(cfg.boardId);
+  if (!board && container) {
+    board = document.createElement('div');
+    board.className = 'board hidden';
+    board.id = cfg.boardId;
+    container.appendChild(board);
+  }
   let html = '';
   cfg.stages.forEach(stage => {
     const done = getStageDone(id, stage);
@@ -265,6 +282,9 @@ function renderBoard(id) {
       const done = isDone(id, stage.id, idx);
       const tagClass = `tag-${item.type}`;
       const typeLabel = TYPE_LABELS[item.type] || item.type;
+      const linkHtml = item.link
+        ? `<a class="card-link" href="${safeLink(item.link)}" target="_blank" rel="noopener">查看文档 →</a>`
+        : '';
       html += `<div class="card ${done ? 'done' : ''}" data-board="${id}" data-stage-id="${stage.id}" data-item-idx="${idx}">
         <div class="card-top">
           <div class="card-checkbox"></div>
@@ -276,7 +296,7 @@ function renderBoard(id) {
         <div class="card-criteria">
           <strong>验收标准</strong><br>${escapeHtml(item.criteria)}
         </div>
-        <a class="card-link" href="${safeLink(item.link)}" target="_blank" rel="noopener">查看文档 →</a>
+        ${linkHtml}
       </div>`;
     });
 
@@ -350,6 +370,12 @@ function renderMenuGroups() {
     const stageLinks = cfg.stages.map(stage => {
       const links = stage.items.map((item, idx) => {
         const done = isDone(id, stage.id, idx);
+        // 无外部文档时渲染为不可跳转的 span，避免点击 href="#" 跳到页顶
+        if (!item.link) {
+          return `<span class="menu-link ${done ? 'done' : ''}" data-board="${id}" data-stage-id="${stage.id}" data-item-idx="${idx}">
+            <span class="menu-link-check"></span>${escapeHtml(item.title)}
+          </span>`;
+        }
         return `<a class="menu-link ${done ? 'done' : ''}" data-board="${id}" data-stage-id="${stage.id}" data-item-idx="${idx}" href="${safeLink(item.link)}" target="_blank" rel="noopener">
           <span class="menu-link-check"></span>${escapeHtml(item.title)}
         </a>`;

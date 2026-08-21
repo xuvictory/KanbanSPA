@@ -11,11 +11,3 @@
 //       - explain 为「通俗讲解」字段（必填），用大白话面向零基础解释该知识点，可带生活化比喻。
 //       - 阶段必须严格套用 SKILL.md 的固定五阶段框架，不要自创阶段。
 const boards = __BOARDS_DATA__;
-
-// type 标签 → 中文名（与 WorkBuddy 完全一致）
-const TYPE_LABELS = {
-  'reading':  '阅读理解',
-  'hands-on': '动手实操',
-  'practice': '练习巩固',
-  'mastery':  '综合应用'
-};

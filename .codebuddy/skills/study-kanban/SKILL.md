@@ -63,6 +63,8 @@ Keep these exact visual tokens so the generated board is indistinguishable in st
   Do NOT change tag rendering to solid-fill.
 - Progress ring: `conic-gradient` white over translucent; glassmorphism pill container.
 - Stage pills in toolbar; legend row; one-click 全选 / 重置 buttons; collapsible sidebar.
+- Legend: the four type labels render as the SAME light-bg/dark-text chips as the card tags (1:1 with
+  WorkBuddy's `.legend-tag`), NOT solid color dots.
 
 ## Fixed 5-stage framework (MANDATORY)
 
@@ -102,7 +104,7 @@ friendliness — do not omit it.
   desc:  "一句话描述学习者将理解或做到什么",
   explain: "用大白话解释：这是什么、为什么这样、怎么上手（面向零基础，最好带一个生活化比喻）",  // 新增，必填
   criteria: "可观察、可验收的标准（学习者做到什么算掌握）",
-  link:  "https://... 该知识点对应的原文锚点，尽量用原链接"  // fallback to the source URL
+  link:  "https://... 该知识点对应的原文锚点，尽量用原链接"  // 可选；为空时卡片不显示「查看文档 →」，左侧菜单该知识点渲染为不可跳转的静态项
 }
 ```
 

@@ -27,11 +27,6 @@
   --card-bg: #ffffff;
   --border: #e2e8f0;
 
-  --tag-reading: #3b82f6;
-  --tag-hands-on: #14b8a6;
-  --tag-practice: #8b5cf6;
-  --tag-mastery: #f59e0b;
-
   --col-color: #3b82f6;
 }
 
@@ -177,7 +172,7 @@ body {
   position: relative;
   transition: all 0.18s;
 }
-.menu-link.done { color: #86efac; }
+.menu-link.done { color: #86efac; text-decoration: line-through; }
 .menu-link.done .menu-link-check {
   background: #10b981;
   border-color: #10b981;
@@ -193,7 +188,6 @@ body {
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
-.menu-link.done .menu-link-text { text-decoration: line-through; }
 
 .collapse-btn {
   position: absolute;
@@ -271,7 +265,7 @@ body {
 .progress-info .label { font-size: 12px; opacity: 0.8; }
 .progress-info .value { font-size: 16px; font-weight: 700; }
 
-/* ============ 图例 ============ */
+/* ============ 图例（浅底深字，与卡片 tag 视觉一致，1:1 复制 WorkBuddy） ============ */
 .legend {
   display: flex;
   gap: 18px;
@@ -280,11 +274,17 @@ body {
   border-bottom: 1px solid var(--border);
 }
 .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
-.legend-dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
-.tag-reading { background: var(--tag-reading); }
-.tag-hands-on { background: var(--tag-hands-on); }
-.tag-practice { background: var(--tag-practice); }
-.tag-mastery { background: var(--tag-mastery); }
+.legend-dot {
+  display: inline-block;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+.legend-dot.reading  { background: #dbeafe; color: #2563eb; }
+.legend-dot.hands-on { background: #ccfbf1; color: #0d9488; }
+.legend-dot.practice { background: #ede9fe; color: #7c3aed; }
+.legend-dot.mastery  { background: #fef3c7; color: #b45309; }
 
 /* ============ 工具栏 ============ */
 .toolbar {
