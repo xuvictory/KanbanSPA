@@ -6,6 +6,7 @@ description: >-
   framework (入门 → 基础 → 进阶 → 实战 → 精通), explained in plain language for beginners. Multi-topic input
   yields a multi-board layout. Trigger phrases: "把这个文档转成看板", "根据链接生成学习看板", "用一段文字生成看板",
   "帮我整理 XX 的学习路线", "做一个 study-kanban".
+version: 1.0.0
 ---
 
 # study-kanban
